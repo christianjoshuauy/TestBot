@@ -10,19 +10,12 @@ const { urlToBuffer } = require("./utils");
 const imageAI = async (user, interaction, openai) => {
   try {
     const input = interaction.options.getString("prompt");
-    interaction.deferReply({ ephemeral: true });
+    interaction.deferReply({ ephemeral: false });
     const response = await openai.createImage({
       prompt: input,
       n: 1,
-      size: "1024x1024",
+      size: "512x512",
     });
-
-    const rowButtons = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId("upgrade_image")
-        .setLabel("Upgrade")
-        .setStyle(ButtonStyle.Success)
-    );
 
     const embeddedMessage = new EmbedBuilder()
       .setTitle(input)
@@ -35,7 +28,6 @@ const imageAI = async (user, interaction, openai) => {
 
     interaction.editReply({
       embeds: [embeddedMessage],
-      components: [rowButtons],
     });
   } catch (error) {
     if (error.response) {
@@ -46,26 +38,14 @@ const imageAI = async (user, interaction, openai) => {
   }
 };
 
-const imageAIVariation = async (
-  user,
-  interaction,
-  openai,
-  isUpgrade = false
-) => {
+const imageAIVariation = async (user, interaction, openai) => {
   try {
-    const input = isUpgrade
-      ? interaction.message.embeds[0].data.image.url
-      : interaction.options.getAttachment("image");
-
-    if (isUpgrade) {
-      console.log(interaction.message.embeds[0].data.image.url);
-    }
-
-    interaction.deferReply({ ephemeral: true });
+    const input = interaction.options.getAttachment("image");
+    interaction.deferReply({ ephemeral: false });
     const response = await openai.createImageVariation(
       fs.createReadStream(await urlToBuffer(input.url)),
       4,
-      "1024x1024"
+      "512x512"
     );
 
     const embeddedMessage = [

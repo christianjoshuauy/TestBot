@@ -11,6 +11,7 @@ const { imageAI, imageAIVariation } = require("./src/imageAI");
 const commands = require("./src/commands");
 const chatAI = require("./src/chatAI");
 const detectAI = require("./src/detectorAI");
+const checkPlagiarism = require("./src/plagiarismChecker");
 require("dotenv").config();
 const client = new Client({
   intents: [
@@ -68,8 +69,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
   if (interaction.channel.name === "image-ai") {
     if (interaction.commandName === "changpt-image") {
       await imageAI(client.user, interaction, openai);
-    } else if (interaction.customId === "upgrade_image") {
-      await imageAIVariation(client.user, interaction, openai, true);
     } else if (interaction.commandName === "changpt-image-variation") {
       await imageAIVariation(client.user, interaction, openai);
     }
@@ -87,6 +86,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
   } else if (interaction.channel.name === "ai-detection") {
     if (interaction.commandName === "detect") {
       await detectAI(client.user, interaction);
+    }
+  } else if (interaction.channel.name === "plagiarism-checker") {
+    if (interaction.commandName === "check-plagiarism") {
+      await checkPlagiarism(client.user, interaction);
     }
   }
 });

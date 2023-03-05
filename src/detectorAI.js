@@ -13,9 +13,8 @@ const detectAI = async (user, interaction) => {
       },
       {
         headers: {
-          Referer: "https://sapling.ai/",
-          Cookie:
-            "session=.eJwVy0EOAiEMAMC_9LwkpBTo8hlSoESjooHdk_Hv6nWSeUPuU9cFUpf70g3yS-dDho4D0jHPv5xLZ742SCAlEHvxppBVQ1HQMJM3WN0ujYJtpVnYoK7Z8_G86fglV2OUhp0L4e7ROuLSuAYmlCBog0YRDAKfL1czKjw.ZAMzxQ.slFjVPMuSQaXJ9O3dNA2_FDpk8o",
+          Referer: process.env.AI_DETECTOR_URL_REF,
+          Cookie: `session=${process.env.AI_DETECTOR_COOKIE}`,
         },
       }
     );

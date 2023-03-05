@@ -26,7 +26,7 @@ const urlToBuffer = async (url) => {
       console.log(err);
     }
   });
-  
+
   return filename;
 };
 

@@ -14,7 +14,7 @@ const chatAI = async (user, interaction, openai, opt) => {
     const response = await openai.createCompletion({
       model: "text-davinci-003",
       prompt: input,
-      max_tokens: 4000,
+      max_tokens: 256,
     });
 
     const rowButtons = new ActionRowBuilder().addComponents([

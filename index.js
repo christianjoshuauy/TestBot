@@ -12,6 +12,7 @@ const commands = require("./src/commands");
 const chatAI = require("./src/chatAI");
 const detectAI = require("./src/detectorAI");
 const checkPlagiarism = require("./src/plagiarismChecker");
+const rephrase = require("./src/rephraser");
 require("dotenv").config();
 const client = new Client({
   intents: [
@@ -90,6 +91,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
   } else if (interaction.channel.name === "plagiarism-checker") {
     if (interaction.commandName === "check-plagiarism") {
       await checkPlagiarism(client.user, interaction);
+    }
+  } else if (interaction.channel.name === "writing-tools") {
+    if (interaction.commandName === "rephrase") {
+      await rephrase(client.user, interaction);
     }
   }
 });

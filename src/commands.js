@@ -39,6 +39,12 @@ const commands = [
     .addStringOption((option) => {
       return option.setName("text").setDescription("text").setRequired(true);
     }),
+  new SlashCommandBuilder()
+    .setName("rephrase")
+    .setDescription("Content Rephraser: #writing-tools")
+    .addStringOption((option) => {
+      return option.setName("text").setDescription("text").setRequired(true);
+    }),
 ];
 
 module.exports = commands;

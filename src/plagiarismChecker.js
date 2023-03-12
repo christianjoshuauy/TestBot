@@ -5,13 +5,13 @@ const checkPlagiarism = async (user, interaction) => {
   try {
     const input = interaction.options.getString("text");
     await interaction.deferReply({
-      ephemeral: true,
+      ephemeral: false,
     });
     let result = "";
     const paragraphArr = input.split("  ");
     // Split input by new line then check plagiarism
     await paragraphArr.map(async (paragraph, i) => {
-      const response = await axios.get(process.env.PARAPHRASE_URL, {
+      const response = await axios.get(process.env.PLAGIARISM_URL, {
         params: {
           payload: `{"input":"${paragraph}","serverId":1,"route":"check-plagiarism","extra":null}`,
         },

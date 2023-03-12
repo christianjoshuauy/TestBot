@@ -45,6 +45,14 @@ const commands = [
     .addStringOption((option) => {
       return option.setName("text").setDescription("text").setRequired(true);
     }),
+  new SlashCommandBuilder()
+    .setName("simplify")
+    .setDescription(
+      "Content Simplifier, explain to a three year old: #writing-tools"
+    )
+    .addStringOption((option) => {
+      return option.setName("text").setDescription("text").setRequired(true);
+    }),
 ];
 
 module.exports = commands;

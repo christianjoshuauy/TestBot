@@ -11,10 +11,14 @@ const chatAI = async (user, interaction, openai, opt) => {
       ? interaction.options.getString("prompt")
       : opt;
     interaction.deferReply({ ephemeral: false });
-    const response = await openai.createCompletion({
-      model: "text-davinci-003",
-      prompt: input,
-      max_tokens: 256,
+    const response = await openai.createChatCompletion({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "user",
+          content: input,
+        },
+      ],
     });
 
     const rowButtons = new ActionRowBuilder().addComponents([
@@ -31,7 +35,7 @@ const chatAI = async (user, interaction, openai, opt) => {
         iconURL: user.defaultAvatarURL,
       })
       .setColor("DarkOrange")
-      .setDescription(response.data.choices[0].text);
+      .setDescription(response.data.choices[0].message.content);
 
     interaction.editReply({
       embeds: [embeddedMessage],

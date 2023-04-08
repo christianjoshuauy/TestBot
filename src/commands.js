@@ -20,7 +20,19 @@ const commands = [
     }),
   new SlashCommandBuilder()
     .setName("changpt-ask")
-    .setDescription("ChatGPT-3: #chatgpt")
+    .setDescription("ChatGPT-3.5: #chatgpt")
+    .addStringOption((option) => {
+      return option
+        .setName("model")
+        .setDescription("model")
+        .setRequired(true)
+        .addChoices({ name: "ChatGPT-3.5", value: "gpt-3.5-turbo" })
+        .addChoices({ name: "ChatGPT-4", value: "gpt-4" })
+        .addChoices({
+          name: "ChatGPT-4 w/ longer context length",
+          value: "gpt-4-32k",
+        });
+    })
     .addStringOption((option) => {
       return option
         .setName("prompt")

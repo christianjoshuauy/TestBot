@@ -10,9 +10,12 @@ const chatAI = async (user, interaction, openai, opt) => {
     const input = interaction.options
       ? interaction.options.getString("prompt")
       : opt;
+    const model = interaction.options
+      ? interaction.options.getString("model")
+      : "gpt-3.5-turbo";
     interaction.deferReply({ ephemeral: false });
     const response = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo",
+      model: model,
       messages: [
         {
           role: "user",

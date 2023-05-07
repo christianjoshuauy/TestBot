@@ -12,7 +12,8 @@ const commands = require("./src/commands");
 const chatAI = require("./src/chatAI");
 const detectAI = require("./src/detectorAI");
 const checkPlagiarism = require("./src/plagiarismChecker");
-const { rephrase, simplify } = require("./src/rephraser");
+const { simplify } = require("./src/rephraser");
+const { unlock, rephrase } = require("./src/unlocker");
 require("dotenv").config();
 const client = new Client({
   intents: [
@@ -98,6 +99,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
     if (interaction.commandName === "simplify") {
       await simplify(client.user, interaction);
+    }
+  } else if (interaction.channel.name === "unlocker") {
+    if (interaction.commandName === "unlock") {
+      await unlock(client.user, interaction);
     }
   }
 });

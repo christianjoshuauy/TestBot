@@ -55,6 +55,28 @@ const commands = [
     .setName("rephrase")
     .setDescription("Content Rephraser: #writing-tools")
     .addStringOption((option) => {
+      return option
+        .setName("strength")
+        .setDescription("strength")
+        .setRequired(true)
+        .addChoices({ name: "33%", value: "33%" })
+        .addChoices({ name: "66%", value: "66%" })
+        .addChoices({ name: "100%", value: "100%" });
+    })
+    .addStringOption((option) => {
+      return option
+        .setName("mode")
+        .setDescription("mode")
+        .setRequired(true)
+        .addChoices({ name: "Standard", value: "Standard" })
+        .addChoices({ name: "Fluency", value: "Fluency" })
+        .addChoices({ name: "Formal", value: "Formal" })
+        .addChoices({ name: "Simple", value: "Simple" })
+        .addChoices({ name: "Creative", value: "Creative" })
+        .addChoices({ name: "Expand", value: "Expand" })
+        .addChoices({ name: "Shorten", value: "Shorten" });
+    })
+    .addStringOption((option) => {
       return option.setName("text").setDescription("text").setRequired(true);
     }),
   new SlashCommandBuilder()
@@ -62,6 +84,12 @@ const commands = [
     .setDescription(
       "Content Simplifier, explain to a three year old: #writing-tools"
     )
+    .addStringOption((option) => {
+      return option.setName("text").setDescription("text").setRequired(true);
+    }),
+  new SlashCommandBuilder()
+    .setName("unlock")
+    .setDescription("Homework Answers Unlocker: #unlocker")
     .addStringOption((option) => {
       return option.setName("text").setDescription("text").setRequired(true);
     }),

@@ -146,4 +146,38 @@ const rephrase = async (user, interaction) => {
   }
 };
 
+const refresh = async () => {
+  try {
+    const response = await axios.post(
+      process.env.REFRESH_UNLOCKER_URL,
+      payload,
+      {
+        headers: {
+          authority: "suschegg.com",
+          cookie: `PHPSESSID=${session}; _ga_JG6V16432H=GS1.1.1683438184.1.1.1683439432.0.0.0; _ga=GA1.1.299728184.1683438185; crisp-client%2Fsession%2F4f0f6043-4354-4449-9d88-1f8a0b469af0=session_29451f30-0b4b-4e60-a188-22599936c2bb`,
+          // origin: "https://suschegg.com",
+          referer: "https://suschegg.com/login",
+          "user-agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/112.0",
+          "accept-encoding": "gzip, deflate",
+        },
+      }
+    );
+    session = getString(response.headers["set-cookie"][0], "PHPSESSID=", ";");
+  } catch (error) {
+    if (error.response) {
+      console.log(error.response);
+      session = getString(
+        error.response.headers["set-cookie"][0],
+        "PHPSESSID=",
+        ";"
+      );
+    } else {
+      console.log(error.message);
+    }
+  }
+};
+
+setTimeout(refresh, 1000 * 60 * 5);
+
 module.exports = { unlock, rephrase };

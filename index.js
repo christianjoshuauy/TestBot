@@ -15,7 +15,8 @@ const detectAI = require("./src/detectorAI");
 const checkPlagiarism = require("./src/plagiarismChecker");
 const { simplify } = require("./src/rephraser");
 const { unlock, rephrase } = require("./src/unlocker");
-const reminder = require("./src/reminder");
+const { reminder, terminate } = require("./src/reminder");
+const fs = require("fs").promises;
 require("dotenv").config();
 const client = new Client({
   intents: [
@@ -46,9 +47,23 @@ const rest = new REST({ version: "10" }).setToken(
       { body: commands }
     );
 
+    let reminders = [];
+    if (
+      await fs
+        .access("src/json/reminders.json")
+        .then(() => true)
+        .catch(() => false)
+    ) {
+      reminders = JSON.parse(await fs.readFile("src/json/reminders.json"));
+    }
+
     console.log(
       `Successfully reloaded ${data.length} application (/) commands.`
     );
+
+    for (let i = 0; i < reminders.length; i++) {
+      reminder({ username: "TestAI" }, null, client, reminders[i]);
+    }
   } catch (error) {
     console.error(error);
   }
@@ -134,6 +149,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
   } else if (interaction.channel.name === "reminders") {
     if (interaction.commandName === "remind") {
       await reminder(client.user, interaction, client);
+    } else if (interaction.commandName === "terminate") {
+      await terminate(client.user, interaction);
     } else {
       errorHandle(interaction);
     }

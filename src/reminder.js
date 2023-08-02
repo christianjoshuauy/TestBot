@@ -1,45 +1,41 @@
+const { EmbedBuilder } = require("discord.js");
 const {
-  EmbedBuilder,
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-} = require("discord.js");
-require("dotenv").config();
+  sendReminder,
+  isTerminated,
+  removeFromTerminated,
+  addToReminders,
+  addToTerminated,
+  modifyReminders,
+} = require("./utils");
 
-const reminder = async (user, interaction, client) => {
+const reminder = async (user, interaction, client, remind) => {
   try {
-    const title = interaction.options
-      ? interaction.options.getString("title")
-      : "Untitled Reminder";
-    const description = interaction.options
-      ? interaction.options.getString("description")
-      : "No description provided";
-    const mode = interaction.options
-      ? interaction.options.getString("mode")
-      : "Everyday";
-    const time = interaction.options
-      ? interaction.options.getString("time")
-      : "00:00";
-    const extra = interaction.options
-      ? interaction.options.getString("extra")
-      : "";
+    let title, description, mode, time, extra, author;
+    if (interaction !== null) {
+      title = interaction.options
+        ? interaction.options.getString("title")
+        : "Untitled Reminder";
+      description = interaction.options
+        ? interaction.options.getString("description")
+        : "No description provided";
+      mode = interaction.options
+        ? interaction.options.getString("mode")
+        : "Everyday";
+      time = interaction.options
+        ? interaction.options.getString("time")
+        : "00:00";
+      extra = interaction.options ? interaction.options.getString("extra") : "";
+    } else {
+      title = remind.title;
+      description = remind.description;
+      mode = remind.mode;
+      time = remind.time;
+      extra = remind.extra;
+      author = remind.author;
+    }
 
-    function sendReminder() {
-      const channel = client.channels.cache.get(
-        process.env.REMINDER_CHANNEL_ID
-      );
-      const embed = new EmbedBuilder()
-        .setTitle(title)
-        .setAuthor({
-          name: user.username,
-          iconURL: user.defaultAvatarURL,
-        })
-        .setColor("DarkOrange")
-        .setDescription(description);
-      channel
-        .send({ content: `<@${interaction.user.id}>`, embeds: [embed] })
-        .then(() => console.log("Reminder sent successfully."))
-        .catch((error) => console.error("Error sending reminder:", error));
+    if (interaction !== null) {
+      await interaction.deferReply({ ephemeral: false });
     }
 
     const [hours, minutes] = time.split(":").map((str) => parseInt(str, 10));
@@ -51,10 +47,16 @@ const reminder = async (user, interaction, client) => {
         date.setDate(date.getDate() + 1);
       }
       const timeRemaining = currentDate.getTime() - Date.now();
-      setTimeout(() => {
-        sendReminder();
-        setInterval(() => {
-          sendReminder();
+      setTimeout(async () => {
+        if (await isTerminated(title)) {
+          return;
+        }
+        sendReminder(user, interaction, client, title, description, author);
+        const inter = setInterval(async () => {
+          if (await isTerminated(title)) {
+            clearInterval(inter);
+          }
+          sendReminder(user, interaction, client, title, description, author);
         }, 24 * 60 * 60 * 1000);
       }, timeRemaining);
     } else if (mode === "Once") {
@@ -63,8 +65,13 @@ const reminder = async (user, interaction, client) => {
         .map((str) => parseInt(str, 10));
       const date = new Date(year, month - 1, day, hours, minutes, 0, 0);
       const timeRemaining = date.getTime() - Date.now();
-      setTimeout(() => {
-        sendReminder();
+      console.log(user);
+      setTimeout(async () => {
+        if (await isTerminated(title)) {
+          return;
+        }
+        sendReminder(user, interaction, client, title, description, author);
+        addToTerminated(title);
       }, timeRemaining);
     } else {
       // Recurring
@@ -82,15 +89,82 @@ const reminder = async (user, interaction, client) => {
         date.setDate(date.getDate() + 1);
       }
       const timeRemaining = currentDate.getTime() - Date.now();
-      setTimeout(() => {
-        if (days.includes(date.getDay())) {
-          sendReminder();
+      setTimeout(async () => {
+        if (await isTerminated(title)) {
+          return;
         }
-        setInterval(() => {
-          sendReminder();
+        if (days.includes(date.getDay())) {
+          sendReminder(user, interaction, client, title, description, author);
+        }
+
+        const inter = setInterval(async () => {
+          if (await isTerminated(title)) {
+            clearInterval(inter);
+          }
+          sendReminder(user, interaction, client, title, description, author);
         }, 24 * 60 * 60 * 1000);
       }, timeRemaining);
     }
+
+    if (user !== null) {
+      const embeddedMessage = new EmbedBuilder()
+        .setTitle(title)
+        .setAuthor({
+          name: user.username,
+          iconURL: user.defaultAvatarURL,
+        })
+        .setColor("DarkOrange")
+        .setDescription("Reminder set!");
+
+      if (await isTerminated(title)) {
+        await removeFromTerminated(title);
+        await modifyReminders(
+          title,
+          interaction.user.id,
+          description,
+          mode,
+          time,
+          extra
+        );
+      } else {
+        if (
+          (await addToReminders(
+            title,
+            interaction.user.id,
+            description,
+            mode,
+            time,
+            extra
+          )) !== -1
+        ) {
+          embeddedMessage.setTitle("Error Adding Reminder");
+          embeddedMessage.setDescription(
+            "Reminder with the same title already exists!"
+          );
+          embeddedMessage.setColor("Red");
+        }
+      }
+
+      interaction.editReply({
+        embeds: [embeddedMessage],
+      });
+    }
+  } catch (error) {
+    if (error.response) {
+      console.log(error.response);
+    } else {
+      console.log(error.message);
+    }
+  }
+};
+
+const terminate = async (user, interaction) => {
+  try {
+    const title = interaction.options
+      ? interaction.options.getString("title")
+      : "Untitled Reminder";
+
+    await interaction.deferReply({ ephemeral: false });
 
     const embeddedMessage = new EmbedBuilder()
       .setTitle(title)
@@ -99,9 +173,17 @@ const reminder = async (user, interaction, client) => {
         iconURL: user.defaultAvatarURL,
       })
       .setColor("DarkOrange")
-      .setDescription("Reminder set!");
+      .setDescription("Reminder terminated!");
 
-    interaction.reply({
+    if ((await addToTerminated(title)) !== -1) {
+      embeddedMessage.setTitle("Error Terminating Reminder");
+      embeddedMessage.setDescription(
+        "Reminder with the same title already terminated!"
+      );
+      embeddedMessage.setColor("Red");
+    }
+
+    interaction.editReply({
       embeds: [embeddedMessage],
     });
   } catch (error) {
@@ -113,4 +195,4 @@ const reminder = async (user, interaction, client) => {
   }
 };
 
-module.exports = reminder;
+module.exports = { reminder, terminate };

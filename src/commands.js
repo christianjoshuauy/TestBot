@@ -95,7 +95,7 @@ const commands = [
     }),
   new SlashCommandBuilder()
     .setName("remind")
-    .setDescription("Scheduler and Reminder: #reminder")
+    .setDescription("Scheduler and Reminder: #reminders")
     .addStringOption((option) => {
       return option.setName("title").setDescription("title").setRequired(true);
     })
@@ -115,10 +115,27 @@ const commands = [
         .addChoices({ name: "One Time", value: "Once" });
     })
     .addStringOption((option) => {
-      return option.setName("extra").setDescription("extra").setRequired(true);
+      return option
+        .setName("extra")
+        .setDescription(
+          "For one-time: DD-MM-YYYY, for recurring: M, T, W, Th, F, Sa, Su (Separated by comma)"
+        )
+        .setRequired(true);
     })
     .addStringOption((option) => {
-      return option.setName("time").setDescription("time").setRequired(true);
+      return option
+        .setName("time")
+        .setDescription("Format: HH:MM (24/Military hour format)")
+        .setRequired(true);
+    }),
+  new SlashCommandBuilder()
+    .setName("terminate")
+    .setDescription("Terminate Reminder: #reminders")
+    .addStringOption((option) => {
+      return option
+        .setName("title")
+        .setDescription("Title of the Reminder to Terminate")
+        .setRequired(true);
     }),
 ];
 

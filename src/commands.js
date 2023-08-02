@@ -93,6 +93,33 @@ const commands = [
     .addStringOption((option) => {
       return option.setName("text").setDescription("text").setRequired(true);
     }),
+  new SlashCommandBuilder()
+    .setName("remind")
+    .setDescription("Scheduler and Reminder: #reminder")
+    .addStringOption((option) => {
+      return option.setName("title").setDescription("title").setRequired(true);
+    })
+    .addStringOption((option) => {
+      return option
+        .setName("description")
+        .setDescription("description")
+        .setRequired(true);
+    })
+    .addStringOption((option) => {
+      return option
+        .setName("mode")
+        .setDescription("mode")
+        .setRequired(true)
+        .addChoices({ name: "Everyday", value: "Everyday" })
+        .addChoices({ name: "Recurring choose which days", value: "Recurring" })
+        .addChoices({ name: "One Time", value: "Once" });
+    })
+    .addStringOption((option) => {
+      return option.setName("extra").setDescription("extra").setRequired(true);
+    })
+    .addStringOption((option) => {
+      return option.setName("time").setDescription("time").setRequired(true);
+    }),
 ];
 
 module.exports = commands;

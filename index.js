@@ -5,6 +5,7 @@ const {
   Collection,
   REST,
   Routes,
+  EmbedBuilder,
 } = require("discord.js");
 const { Configuration, OpenAIApi } = require("openai");
 const { imageAI, imageAIVariation } = require("./src/imageAI");
@@ -14,6 +15,7 @@ const detectAI = require("./src/detectorAI");
 const checkPlagiarism = require("./src/plagiarismChecker");
 const { simplify } = require("./src/rephraser");
 const { unlock, rephrase } = require("./src/unlocker");
+const reminder = require("./src/reminder");
 require("dotenv").config();
 const client = new Client({
   intents: [
@@ -65,6 +67,21 @@ client.on(Events.ClientReady, () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
 
+const errorHandle = (interaction) => {
+  const embeddedMessage = new EmbedBuilder()
+    .setTitle("Error 304")
+    .setAuthor({
+      name: client.user.username,
+      iconURL: client.user.defaultAvatarURL,
+    })
+    .setColor("DarkOrange")
+    .setDescription("Wrong Channel Error");
+  interaction.reply({
+    embeds: [embeddedMessage],
+    ephemeral: true,
+  });
+};
+
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand() && !interaction.isButton()) return;
 
@@ -73,6 +90,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
       await imageAI(client.user, interaction, openai);
     } else if (interaction.commandName === "changpt-image-variation") {
       await imageAIVariation(client.user, interaction, openai);
+    } else {
+      errorHandle(interaction);
     }
   } else if (interaction.channel.name === "chatgpt") {
     if (interaction.commandName === "changpt-ask") {
@@ -84,10 +103,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
         openai,
         interaction.message.embeds[0].data.title
       );
+    } else {
+      errorHandle(interaction);
     }
   } else if (interaction.channel.name === "ai-detection") {
     if (interaction.commandName === "detect") {
       await detectAI(client.user, interaction);
+    } else {
+      errorHandle(interaction);
     }
   } else if (interaction.channel.name === "plagiarism-checker") {
     if (interaction.commandName === "check-plagiarism") {
@@ -99,10 +122,20 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
     if (interaction.commandName === "simplify") {
       await simplify(client.user, interaction);
+    } else {
+      errorHandle(interaction);
     }
   } else if (interaction.channel.name === "unlocker") {
     if (interaction.commandName === "unlock") {
       await unlock(client.user, interaction);
+    } else {
+      errorHandle(interaction);
+    }
+  } else if (interaction.channel.name === "reminders") {
+    if (interaction.commandName === "remind") {
+      await reminder(client.user, interaction, client);
+    } else {
+      errorHandle(interaction);
     }
   }
 });

@@ -112,7 +112,7 @@ const addToTerminated = async (title) => {
       );
     }
     const existingReminderIndex = terminatedReminders.findIndex(
-      (terminatedReminders) => reminder.title === title
+      (terminatedReminders) => terminatedReminders.title === title
     );
 
     if (existingReminderIndex === -1) {

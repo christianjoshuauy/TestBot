@@ -16,6 +16,7 @@ const checkPlagiarism = require("./src/plagiarismChecker");
 const { simplify } = require("./src/rephraser");
 const { unlock, rephrase } = require("./src/unlocker");
 const { reminder, terminate } = require("./src/reminder");
+const { isTerminated } = require("./src/utils");
 const fs = require("fs").promises;
 require("dotenv").config();
 const client = new Client({
@@ -33,7 +34,7 @@ const rest = new REST({ version: "10" }).setToken(
 );
 
 // Deploy the commands
-(async () => {
+async function refreshCommands() {
   try {
     console.log(
       `Started refreshing ${commands.length} application (/) commands.`
@@ -47,27 +48,15 @@ const rest = new REST({ version: "10" }).setToken(
       { body: commands }
     );
 
-    let reminders = [];
-    if (
-      await fs
-        .access("src/json/reminders.json")
-        .then(() => true)
-        .catch(() => false)
-    ) {
-      reminders = JSON.parse(await fs.readFile("src/json/reminders.json"));
-    }
-
     console.log(
       `Successfully reloaded ${data.length} application (/) commands.`
     );
-
-    for (let i = 0; i < reminders.length; i++) {
-      reminder({ username: "TestAI" }, null, client, reminders[i]);
-    }
   } catch (error) {
     console.error(error);
   }
-})();
+}
+
+refreshCommands();
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
@@ -78,7 +67,23 @@ const openai = new OpenAIApi(configuration);
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 // Wait for the bot to be ready
-client.on(Events.ClientReady, () => {
+client.on(Events.ClientReady, async () => {
+  let reminders = [];
+  if (
+    await fs
+      .access("src/json/reminders.json")
+      .then(() => true)
+      .catch(() => false)
+  ) {
+    reminders = JSON.parse(await fs.readFile("src/json/reminders.json"));
+  }
+
+  for (let i = 0; i < reminders.length; i++) {
+    if (!(await isTerminated(reminders[i].title))) {
+      console.log(reminders[i].title);
+      reminder(client.user, null, client, reminders[i]);
+    }
+  }
   console.log(`Logged in as ${client.user.tag}!`);
 });
 

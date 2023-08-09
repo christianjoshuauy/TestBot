@@ -88,12 +88,6 @@ const commands = [
       return option.setName("text").setDescription("text").setRequired(true);
     }),
   new SlashCommandBuilder()
-    .setName("unlock")
-    .setDescription("Homework Answers Unlocker: #unlocker")
-    .addStringOption((option) => {
-      return option.setName("text").setDescription("text").setRequired(true);
-    }),
-  new SlashCommandBuilder()
     .setName("remind")
     .setDescription("Scheduler and Reminder: #reminders")
     .addStringOption((option) => {
@@ -127,6 +121,12 @@ const commands = [
         .setName("time")
         .setDescription("Format: HH:MM (24/Military hour format)")
         .setRequired(true);
+    }),
+  new SlashCommandBuilder()
+    .setName("unlock")
+    .setDescription("Homework Answers Unlocker: #unlocker")
+    .addStringOption((option) => {
+      return option.setName("text").setDescription("text").setRequired(true);
     }),
   new SlashCommandBuilder()
     .setName("terminate")

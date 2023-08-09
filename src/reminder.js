@@ -46,12 +46,15 @@ const reminder = async (user, interaction, client, remind) => {
       if (date.getTime() <= Date.now()) {
         date.setDate(date.getDate() + 1);
       }
-      const timeRemaining = currentDate.getTime() - Date.now();
+      const timeRemaining =
+        date.getTime() - new Date(Date.now() + 8 * 60 * 60 * 1000).getTime();
       setTimeout(async () => {
         if (await isTerminated(title)) {
           return;
         }
-        sendReminder(user, interaction, client, title, description, author);
+        if (timeRemaining >= 0) {
+          sendReminder(user, interaction, client, title, description, author);
+        }
         const inter = setInterval(async () => {
           if (await isTerminated(title)) {
             clearInterval(inter);
@@ -64,36 +67,45 @@ const reminder = async (user, interaction, client, remind) => {
         .split("-")
         .map((str) => parseInt(str, 10));
       const date = new Date(year, month - 1, day, hours, minutes, 0, 0);
-      const timeRemaining = date.getTime() - Date.now();
-      console.log(user);
+      const timeRemaining =
+        date.getTime() - new Date(Date.now() + 8 * 60 * 60 * 1000).getTime();
       setTimeout(async () => {
         if (await isTerminated(title)) {
           return;
         }
-        sendReminder(user, interaction, client, title, description, author);
+        if (timeRemaining >= 0) {
+          sendReminder(user, interaction, client, title, description, author);
+        }
         addToTerminated(title);
       }, timeRemaining);
     } else {
       // Recurring
       extra = extra.replace(/\s/g, "");
-      const days = extra.split(",");
-      const daysArr = ["m", "t", "w", "th", "f", "sa", "su"];
+      let days = extra.split(",");
+      const daysArr = ["su", "m", "t", "w", "th", "f", "sa"];
       for (let i = 0; i < days.length; i++) {
-        if (days[i].toLowerCase() === daysArr[i]) {
-          days[i] = i;
+        let dayIndex = days[i];
+        if (!Number.isInteger(dayIndex)) {
+          dayIndex = daysArr.indexOf(days[i].toLowerCase());
+        }
+        if (dayIndex !== -1) {
+          console.log(dayIndex);
+          days[i] = dayIndex;
         }
       }
+      console.log(days);
       const date = new Date();
       date.setHours(hours, minutes, 0, 0);
       if (date.getTime() <= Date.now()) {
         date.setDate(date.getDate() + 1);
       }
-      const timeRemaining = currentDate.getTime() - Date.now();
+      const timeRemaining =
+        date.getTime() - new Date(Date.now() + 8 * 60 * 60 * 1000).getTime();
       setTimeout(async () => {
         if (await isTerminated(title)) {
           return;
         }
-        if (days.includes(date.getDay())) {
+        if (timeRemaining >= 0 && days.includes(date.getDay())) {
           sendReminder(user, interaction, client, title, description, author);
         }
 
@@ -101,7 +113,9 @@ const reminder = async (user, interaction, client, remind) => {
           if (await isTerminated(title)) {
             clearInterval(inter);
           }
-          sendReminder(user, interaction, client, title, description, author);
+          if (days.includes(date.getDay())) {
+            sendReminder(user, interaction, client, title, description, author);
+          }
         }, 24 * 60 * 60 * 1000);
       }, timeRemaining);
     }
